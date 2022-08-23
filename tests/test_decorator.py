@@ -152,7 +152,7 @@ class TestClassOpt(unittest.TestCase):
             def error(self, message):
                 raise userArgumentParserException()
 
-        @classopt(parser=userArgumentParser())
+        @classopt(parser_factory=userArgumentParser)
         class Opt:
             arg_int: int
             arg_str: str
@@ -231,7 +231,6 @@ class TestClassOpt(unittest.TestCase):
         assert opt1.arg_int == opt2.arg_int
         assert opt1.arg_str == opt2.arg_str
         assert opt1.arg_float == opt2.arg_float
-
 
 def set_args(*args):
     del_args()  # otherwise tests fail with e.g. "pytest -s"

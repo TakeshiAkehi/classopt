@@ -1,7 +1,7 @@
 import typing
 from argparse import ArgumentParser
 from dataclasses import MISSING, Field, dataclass
-from typing import TYPE_CHECKING, overload, Optional, List
+from typing import TYPE_CHECKING, overload, Optional, List, Callable
 
 from classopt import config
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     class _ClassOptGeneric(Generic[_T]):
         @classmethod
-        def from_args(cls) -> _T:
+        def from_args(cls, *args: str) -> _T:
             ...
 
 
@@ -22,6 +22,7 @@ def classopt(
     cls: "Type[_C]",
     default_long: bool = False,
     default_short: bool = False,
+    parser_factory: Callable[[],ArgumentParser] = None,
 ) -> "Union[Type[_C], Type[_ClassOptGeneric[_C]]]":
     ...
 
@@ -31,13 +32,14 @@ def classopt(
     cls: "Literal[None]" = None,
     default_long: bool = False,
     default_short: bool = False,
+    parser_factory: Callable[[],ArgumentParser] = None,
 ) -> "Callable[[Type[_C]], Union[Type[_C], Type[_ClassOptGeneric[_C]]]]":
     ...
 
 
-def classopt(cls=None, default_long=False, default_short=False, parser=None):
+def classopt(cls=None, default_long=False, default_short=False, parser_factory=ArgumentParser):
     def wrap(cls):
-        return _process_class(cls, default_long, default_short, parser)
+        return _process_class(cls, default_long, default_short, parser_factory)
 
     if cls is None:
         return wrap
@@ -46,11 +48,11 @@ def classopt(cls=None, default_long=False, default_short=False, parser=None):
 
 
 def _process_class(
-    cls, default_long: bool, default_short: bool, external_parser: ArgumentParser
+    cls, default_long: bool, default_short: bool, parser_factory
 ):
     @classmethod
     def from_args(cls, args: Optional[List[str]] = None):
-        parser = external_parser if external_parser is not None else ArgumentParser()
+        parser = parser_factory()
 
         for arg_name, arg_field in cls.__dataclass_fields__.items():
             kwargs = {}
