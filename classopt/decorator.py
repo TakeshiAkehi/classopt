@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     class _ClassOptGeneric(Generic[_T]):
         @classmethod
-        def from_args(cls, *args: str) -> _T:
+        def from_args(cls, args: Optional[List[str]] = None) -> _T:
             ...
 
 
